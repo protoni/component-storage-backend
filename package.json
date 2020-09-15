@@ -1,0 +1,35 @@
+{
+  "name": "component-storage-backend",
+  "version": "1.0.0",
+  "description": "backend for component storage",
+  "main": "app",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@gitlab.com/protoni/component-storage-backend.git"
+  },
+  "keywords": [
+    "backend",
+    "component",
+    "storage"
+  ],
+  "author": "toni",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://gitlab.com/protoni/component-storage-backend/issues"
+  },
+  "homepage": "https://gitlab.com/protoni/component-storage-backend#readme",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "d3": "^6.1.1",
+    "express": "^4.17.1",
+    "mongoose": "^5.10.5",
+    "mysql": "^2.18.1",
+    "mysql2": "^2.1.0",
+    "readline-sync": "^1.4.10",
+    "request": "^2.88.2",
+    "request-promise": "^4.2.6"
+  }
+}
