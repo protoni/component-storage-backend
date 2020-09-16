@@ -14,6 +14,7 @@ class Database {
         this.password = password;
         this.dbName = dbName;
         this.blogPostTable = "blog_posts";
+        this.storageTable = "storage_components";
         this.connection;
         this.init();
     }
@@ -22,22 +23,24 @@ class Database {
         let setDbOk;
         let initTablesOk;
         
-        let connection = mysql.createConnection({
+        let conn = mysql.createConnection({
             host: this.host,
             user: this.user,
             password: this.password
           }
         );
-        console.log("connection: " + printObject(connection))
-        connection.connect(function(err) {
+        console.log("connection: " + printObject(conn))
+        conn.connect(function(err) {
             console.log("-----------------")
             if (err) {
                 console.error('error connecting: ' + err.stack);
                 return;
             }
  
-            console.log('connected as id ' + connection.threadId);
+            console.log('connected as id ' + conn.threadId);
         });
+        
+        this.connection = conn;
         
         setDbOk = await this.setDatabase();
         initTablesOk = await this.initTables();
@@ -80,6 +83,7 @@ class Database {
 
     async initTables() {
         return await this.initBlogPostsTable();
+        return await this.initComponentStorageTable();
     }
 
     async initBlogPostsTable() {
@@ -93,7 +97,19 @@ class Database {
         console.log("query: " + query)
         return await this.checkTable(this.blogPostTable, query);
     }
-
+    
+    async initComponentStorageTable() {
+        let query = `CREATE TABLE IF NOT EXISTS ` + this.storageTable + ` (
+            id INT AUTO_INCREMENT PRIMARY KEY, 
+            title VARCHAR(255) NOT NULL, 
+            content TEXT, 
+            created TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
+            status TINYINT NOT NULL
+        )`;
+        console.log("query: " + query)
+        return await this.checkTable(this.storageTable, query);
+    }
+    
     async setDatabase() {
         let dbOk = await this.selectDatabase(this.dbName);
         if(dbOk == 0) {
@@ -101,6 +117,12 @@ class Database {
             let createOk = await this.createDatabase(this.dbName);
             if(createOk != 0) {
                 console.log("Successfully created a new database!");
+                dbOk = await this.selectDatabase(this.dbName);
+                if(!dbOk) {
+                    console.log("Failed to connect to newly created database: " + this.dbName);
+                } else {
+                    console.log("Successfully connected to newly created database: " + this.dbName);
+                }
             } else {
                 console.log("Failed to create a new database!");
                 return false;
@@ -149,10 +171,12 @@ class Database {
     }
 
     async createDatabase(name) {
+        console.log("dbg1");
         return await this.query("CREATE DATABASE IF NOT EXISTS " + name);
     }
 
     async selectDatabase(name) {
+        console.log("dbg2");
         return await this.query("USE " + name);
     }
 
