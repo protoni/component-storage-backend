@@ -90,6 +90,7 @@ class Database {
             created TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
             status TINYINT NOT NULL
         )`;
+        console.log("query: " + query)
         return await this.checkTable(this.blogPostTable, query);
     }
 

@@ -4,10 +4,10 @@ const apiRouter = require("./backend/apirouter.js");
 const mongoose = require("mongoose");
 
 // Init MongoDB
-mongoose.connect('mongodb://localhost/my_database', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-});
+//mongoose.connect('mongodb://localhost/my_database', {
+//  useNewUrlParser: true,
+//  useUnifiedTopology: true
+//});
 
 // Init express
 let app = express();

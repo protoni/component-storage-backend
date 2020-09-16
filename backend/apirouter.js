@@ -14,7 +14,7 @@ function promptPassword() {
 let password = promptPassword();
 
 // Init MySQL database
-const db = new database("localhost", "root2", password, "test");
+const db = new database("localhost", "admin", password, "test");
 
 // Temp. Current saved blog file names.
 global.savedFiles = [];
