@@ -136,8 +136,8 @@ apiRouter.post('/test', function(req, res) {
     res.status(200).json({"message":"success"})
 })
 
-apiRouter.post('/save', function(req, res) {
-    //console.log("save called. req:" + printObject(req.body));
+apiRouter.post('/addComponent', function(req, res) {
+    console.log("addComponent called. req:" + printObject(req.body));
     try {
         //mongodb.save(req.body);
         /*
