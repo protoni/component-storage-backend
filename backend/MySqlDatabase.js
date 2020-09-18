@@ -82,32 +82,45 @@ class Database {
     }
 
     async initTables() {
-        return await this.initBlogPostsTable();
         return await this.initComponentStorageTable();
     }
 
-    async initBlogPostsTable() {
-        let query = `CREATE TABLE IF NOT EXISTS ` + this.blogPostTable + ` (
-            id INT AUTO_INCREMENT PRIMARY KEY, 
-            title VARCHAR(255) NOT NULL, 
-            content TEXT, 
-            created TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
-            status TINYINT NOT NULL
-        )`;
-        console.log("query: " + query)
-        return await this.checkTable(this.blogPostTable, query);
-    }
-    
     async initComponentStorageTable() {
         let query = `CREATE TABLE IF NOT EXISTS ` + this.storageTable + ` (
             id INT AUTO_INCREMENT PRIMARY KEY, 
-            title VARCHAR(255) NOT NULL, 
-            content TEXT, 
-            created TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
-            status TINYINT NOT NULL
+            productId VARCHAR(255) NOT NULL, 
+            name VARCHAR(255) NOT NULL, 
+            description TEXT,
+            manufacturer VARCHAR(255) NOT NULL,
+            quantity INT,
+            package VARCHAR(255) NOT NULL, 
+            location VARCHAR(255) NOT NULL, 
+            created TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )`;
         console.log("query: " + query)
         return await this.checkTable(this.storageTable, query);
+    }
+    
+    async insertComponent(component) {
+        let query = "INSERT INTO " + this.storageTable + 
+        " (productId, name, description, manufacturer, quantity, package, location) VALUES "+ 
+        "('" + component.data.id + 
+        "','" + component.data.name +
+        "','" + component.data.description +
+        "','" + component.data.manufacturer +
+        "','" + component.data.quantity +
+        "','" + component.data.package +
+        "','" + component.data.location +
+        "')";
+        let queryOk = await this.query(query);
+        if(queryOk != 0) {
+            console.log("Successfully inserted a row to a table: " + this.storageTable + "!");
+        } else {
+            console.log("Failed to insert a row to a table: " + this.storageTable + "! Query: " + query);
+            return false;
+        }
+
+        return true;
     }
     
     async setDatabase() {
