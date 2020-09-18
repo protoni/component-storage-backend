@@ -123,6 +123,19 @@ class Database {
         return true;
     }
     
+    
+    async getComponents() {
+        let query = "SELECT * FROM " + this.storageTable;
+        let ret = await this.query(query);
+        if(ret != 0) {
+            console.log("Successfully got * from table: " + this.storageTable + "!");
+            return ret;
+        } else {
+            console.log("Failed to get * from table: " + this.storageTable + "! Query: " + query);
+            return false;
+        }
+    }
+    
     async setDatabase() {
         let dbOk = await this.selectDatabase(this.dbName);
         if(dbOk == 0) {

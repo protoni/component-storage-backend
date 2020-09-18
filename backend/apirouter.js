@@ -124,11 +124,13 @@ function readCandleData() {
     }
 }
 
-apiRouter.get('/candle', function(req, res) {
-    console.log("get Candle data")
-    data = readCandleData()
-    printObject(data)
-    res.status(200).json({"data":data})
+apiRouter.get('/getComponents', async function(req, res) {
+    console.log("GET component data")
+    //let data = {};
+    let components = await db.getComponents();
+    console.log("components: " + printObject(components))
+    
+    res.status(200).json({"data":components})
 })
 
 apiRouter.post('/test', function(req, res) {
