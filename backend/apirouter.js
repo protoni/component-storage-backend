@@ -1,10 +1,43 @@
 let express = require("express");
+const path = require('path');
 let apiRouter = express.Router();
-let d3 = require("d3");
+const fs = require('fs'); 
 const util = require('util');
 const database = require('./MySqlDatabase.js');
 const readlineSync = require('readline-sync');
-//const mongodb = require('./MongoDbDatabase.js');
+var multer  = require('multer')
+
+
+// Setup disk storage
+const storage = multer.diskStorage({
+    destination: './public/uploads/',
+    filename: function(req, file, cb){
+      cb(null,file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+    }
+  });
+
+// Check File Type
+function checkFileType(file, cb){
+    const filetypes = /txt|jpeg|jpg|png|gif|zip|pdf/;
+    //const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+    //const mimetype = filetypes.test(file.mimetype);
+    const extname = true;
+    const mimetype = true;
+    if(mimetype && extname){
+      return cb(null,true);
+    } else {
+      cb('Error: Unsupported filetype!');
+    }
+  }
+
+// Setup file uploader
+const upload = multer({
+    storage: storage,
+    limits:{fileSize: 100000000},
+    fileFilter: function(req, file, cb){
+      checkFileType(file, cb);
+    }
+  }).any('file');
 
 // Get the MySQL password
 function promptPassword() {
@@ -19,20 +52,18 @@ const db = new database("localhost", "admin", password, "test");
 // Temp. Current saved blog file names.
 global.savedFiles = [];
 
-function addToFileList(req) {
-    console.log("len: " + req.body.data.length)
-    
-    let rowCount = req.body.data.length;
-    if(rowCount > 0) {
-        let file = req.body.filename;
-        if(file != "Untitled") {
-            console.log("file: " + file)
-            console.log("saved files: " + savedFiles);
-            if (!savedFiles.includes(file)) {
-                console.log("pushing")
-                savedFiles.push(file);
-            }
-        }
+
+const configFile = "config.json";
+
+function readFile(filename) {
+    if(fs.existsSync(filename)) {
+        let raw = fs.readFileSync(filename);
+        //let json = JSON.parse(raw);
+        console.log("file content: " + raw);
+        //return json;
+    } else {
+        console.log("file: " + filename + " doesn't exist!");
+        return null;
     }
 }
 
@@ -54,75 +85,6 @@ apiRouter.get('/blogName'), function(req, res) {
     res.status(200).json({"filename":blogName})
 }
 
-const fs = require('fs'); 
-const configFile = "C:/work/git/binance-market-analyzer/candles/ETH/1d";
-
-function creatCandleObject(data) {
-    row = data.split(',')
-
-    if(row.length === 13) {
-        let converted = d3.timeFormat("%Y-%m-%d:%H-%M-%s")
-        
-        return {
-            'absoluteChange': '',
-            'close': row[4],
-            'date': converted(row[6]),
-            'dividend': '',
-            'high': row[2],
-            'low': row[3],
-            'open': row[1],
-            'percentageChange': '',
-            'split': '',
-            'volume': row[5]
-        }
-    }
-
-    return null;
-}
-
-function createCandleData(raw) {
-    items = raw.split('\n')
-    console.log("items len: " + items.length)
-    pages = []
-    page = []
-    pagingCounter = 0
-    paging = 99
-    errors = 0
-    for(let i = 0; i < items.length; i++) {
-        obj = creatCandleObject(items[i])
-        
-        if(obj != null) {
-            pages.push(obj)
-            /*
-            if(pagingCounter++ >= paging) {
-                //console.log(page)
-                pages.push(page)
-                page = []
-                pagingCounter = 0
-            }
-            */
-        } else {
-            errors++;
-        }
-
-    }
-
-    console.log("pages len: " + pages.length)
-    console.log("errors: " + errors)
-
-    return pages
-}
-
-function readCandleData() {
-    if(fs.existsSync(configFile)) {
-        let raw = fs.readFileSync(configFile).toString('utf-8');
-        //let json = JSON.parse(raw);
-        
-        return createCandleData(raw);
-    } else {
-        return null;
-    }
-}
 
 apiRouter.get('/getComponents', async function(req, res) {
     console.log("GET component data")
@@ -136,6 +98,17 @@ apiRouter.get('/getComponents', async function(req, res) {
 apiRouter.post('/test', function(req, res) {
     //console.log("test called. req:" + printObject(req.body));
     res.status(200).json({"message":"success"})
+})
+
+apiRouter.post('/saveFiles', function(req, res) {
+    upload(req, res, (err) => {
+        if(err) {
+            res.status(500).json({"message": "Unexpected error: " + err.message})
+        } else {
+            console.log("File uploaded successfully!")
+            res.status(200).json({"message":"File uploaded successfully!"})
+        }
+    });
 })
 
 apiRouter.post('/addComponent', function(req, res) {

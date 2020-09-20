@@ -2,6 +2,8 @@ const express = require("express");
 const bodyParser = require('body-parser')
 const apiRouter = require("./backend/apirouter.js");
 const mongoose = require("mongoose");
+const fileUpload = require('express-fileupload');
+const cors = require('cors')
 
 // Init MongoDB
 //mongoose.connect('mongodb://localhost/my_database', {
@@ -12,7 +14,8 @@ const mongoose = require("mongoose");
 // Init express
 let app = express();
 app.use(bodyParser.json());
-app.use(express.static(__dirname+"/public_www"));
+app.use(bodyParser.urlencoded({ extended: false }))
+app.use(express.static('./public'));
 app.use('/api', apiRouter)
 
 
