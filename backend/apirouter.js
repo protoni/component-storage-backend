@@ -95,6 +95,16 @@ apiRouter.get('/getComponents', async function(req, res) {
     res.status(200).json({"data":components})
 })
 
+apiRouter.get('/getComponent/:id', async function(req, res) {
+    let id = req.params.id;
+
+    console.log("GET component data for id: " + id)
+    let component = await db.getComponent(id);
+    console.log("component: " + printObject(component))
+
+    res.status(200).json({"data":component})
+})
+
 apiRouter.post('/test', function(req, res) {
     //console.log("test called. req:" + printObject(req.body));
     res.status(200).json({"message":"success"})

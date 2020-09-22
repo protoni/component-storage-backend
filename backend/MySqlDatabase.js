@@ -135,6 +135,18 @@ class Database {
             return false;
         }
     }
+
+    async getComponent(id) {
+        let query = "SELECT * FROM " + this.storageTable + " WHERE productId='" + id + "'" ;
+        let ret = await this.query(query);
+        if(ret != 0) {
+            console.log("Successfully got productId" + id + " from table: " + this.storageTable + "!");
+            return ret;
+        } else {
+            console.log("Failed to get productId" + id + " from table: " + this.storageTable + "! Query: " + query);
+            return false;
+        }
+    }
     
     async setDatabase() {
         let dbOk = await this.selectDatabase(this.dbName);
