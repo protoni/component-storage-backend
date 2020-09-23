@@ -4,15 +4,18 @@ let apiRouter = express.Router();
 const fs = require('fs'); 
 const util = require('util');
 const database = require('./MySqlDatabase.js');
+const FileHandler = require('./FileHandler.js');
 const readlineSync = require('readline-sync');
 var multer  = require('multer')
 
+var UPLOADED_FILE_SUFFIX = "fileUpload";
+var UPLOAD_DESTINATION = "./public/uploads/";
 
 // Setup disk storage
 const storage = multer.diskStorage({
-    destination: './public/uploads/',
+    destination: UPLOAD_DESTINATION,
     filename: function(req, file, cb){
-      cb(null,file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+      cb(null,file.originalname + '-' + UPLOADED_FILE_SUFFIX + Date.now() + path.extname(file.originalname));
     }
   });
 
@@ -52,6 +55,8 @@ const db = new database("localhost", "admin", password, "test");
 // Temp. Current saved blog file names.
 global.savedFiles = [];
 
+// Init FileHandler
+const fileHandler = new FileHandler(UPLOAD_DESTINATION);
 
 const configFile = "config.json";
 
@@ -70,21 +75,6 @@ function readFile(filename) {
 function printObject(obj) {
     console.log(util.inspect(obj, false, null, true /* enable colors */))
 }
-
-
-async function testDB() {
-    console.log("testing db");
-    //await db.query("use test2");
-    //db.selectDatabase("test2");
-    //const tables = await db.query("select * from example");
-    //printObject(tables);
-    //console.log("testing db done. rows: " + tables[1].id);
-}
-
-apiRouter.get('/blogName'), function(req, res) {
-    res.status(200).json({"filename":blogName})
-}
-
 
 apiRouter.get('/getComponents', async function(req, res) {
     console.log("GET component data")
@@ -105,57 +95,38 @@ apiRouter.get('/getComponent/:id', async function(req, res) {
     res.status(200).json({"data":component})
 })
 
-apiRouter.post('/test', function(req, res) {
-    //console.log("test called. req:" + printObject(req.body));
-    res.status(200).json({"message":"success"})
-})
-
 apiRouter.post('/saveFiles', function(req, res) {
     upload(req, res, (err) => {
         if(err) {
             res.status(500).json({"message": "Unexpected error: " + err.message})
         } else {
             console.log("File uploaded successfully!")
+            console.log(printObject(req.files))
+            fileHandler.storeNewFile(req.files);
             res.status(200).json({"message":"File uploaded successfully!"})
         }
     });
 })
 
 apiRouter.post('/addComponent', function(req, res) {
-    console.log("addComponent called. req:" + printObject(req.body));
-    
+    console.log("addComponent called. req:")
+    console.log(printObject(req.body));
+    console.log("len: " + req.body.data.files.length);
+
+    // Add part number to the file object
+    let newArr = req.body.data.files;
+    for (let i = 0; i < req.body.data.files.length; i++) {
+        newArr[i].partNum = req.body.data.id;
+    }
+
+    fileHandler.addFileToStoringQueue(newArr);
+    fileHandler.waitStoragingDone(newArr);
+
     try {
         db.insertComponent(req.body);
         res.status(200).json({"message":"success"})
     } catch(err) {
         console.log("POST /addComponent: Database call failed! Error: " + err)
-        res.status(500).json({"message":"Database call failed!"})
-    }
-})
-
-apiRouter.get('/load/:title', function(req, res) {
-    try {
-        console.log("/load called!");
-        console.log("title: " + req.params.title)
-        /*
-        let obj = mongodb.load('asd1');
-        
-        obj.then(data => {
-            //printObject(data);
-            console.log("obj: "+ data);
-            res.status(200).json({"data":data});
-        })*/
-        /*
-        let ret = db.loadPost('React');
-        
-        ret.then(data => {
-            printObject(data);
-            console.log("data: " + data);
-            res.status(200).json({"data":data})
-        })*/
-        
-    } catch(err) {
-        console.log("GET /load: Database call failed! Error: " + err.message)
         res.status(500).json({"message":"Database call failed!"})
     }
 })
