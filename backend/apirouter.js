@@ -15,7 +15,7 @@ var UPLOAD_DESTINATION = "./public/uploads/";
 const storage = multer.diskStorage({
     destination: UPLOAD_DESTINATION,
     filename: function(req, file, cb){
-      cb(null,file.originalname + '-' + UPLOADED_FILE_SUFFIX + Date.now() + path.extname(file.originalname));
+      cb(null,file.originalname);
     }
   });
 
@@ -130,5 +130,39 @@ apiRouter.post('/addComponent', function(req, res) {
         res.status(500).json({"message":"Database call failed!"})
     }
 })
+/*
+apiRouter.get('/downloadFile/:partNum/:filename', function (req, res) {
+    const { partNum, filename } = req.params;
+    console.log("getting file: "+ filename + " for part number: " + partNum);
+    res.download(path.join('./public/uploads/ytdl.exe'), function (err) {
+        console.log(err);
+    });
+}); */
+
+apiRouter.get('/getFile/:partNum/:filename', function (req, res) {
+    const { partNum, filename } = req.params;
+    console.log("getting file: "+ filename + " for part number: " + partNum);
+    
+    console.log("Path: " + path.join(__dirname, '..', 'fileStorage', partNum, filename))
+    //res.download(path.join(__dirname, '..', 'fileStorage', partNum, filename), function (err) {
+        res.download('./fileStorage/' + partNum + '/' + filename, function (err) {
+        console.log("Error: " + err);
+    });
+});
+
+apiRouter.get('/getFiles/:partNum', (req, res) => {
+    const { partNum } = req.params;
+    console.log("Getting files for part number: " + partNum);
+    console.log("path: " + __dirname);
+    res.sendFile(__dirname + '/ohYouDog.PNG');
+});
+
+apiRouter.get('/getFileHeaders/:partNum', async (req, res) => {
+    const { partNum } = req.params;
+    console.log("Getting file headers for part number: " + partNum);
+    let files = await fileHandler.getFileHeaders(partNum);
+    console.log(files);
+    res.status(200).json({'files':files});
+});
 
 module.exports = apiRouter;

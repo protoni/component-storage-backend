@@ -121,5 +121,16 @@ class FileHandler {
         return 0;
     }
 
+    getFileHeaders(partNum) {
+        let fileLocation = this.fileStorage + partNum + '/';
+        let fileList = [];
+
+        fs.readdirSync(fileLocation).forEach(file => {
+            fileList.push(file);
+        });
+
+        return fileList;
+    }
 }
+
 module.exports = FileHandler;
