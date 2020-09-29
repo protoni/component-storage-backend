@@ -93,8 +93,9 @@ class Database {
             description TEXT,
             manufacturer VARCHAR(255) NOT NULL,
             quantity INT,
-            package VARCHAR(255) NOT NULL, 
-            location VARCHAR(255) NOT NULL, 
+            package VARCHAR(255) NOT NULL,
+            location VARCHAR(255) NOT NULL,
+            thumbnail VARCHAR(255) NOT NULL,
             created TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )`;
         console.log("query: " + query)
@@ -103,7 +104,7 @@ class Database {
     
     async insertComponent(component) {
         let query = "INSERT INTO " + this.storageTable + 
-        " (productId, name, description, manufacturer, quantity, package, location) VALUES "+ 
+        " (productId, name, description, manufacturer, quantity, package, location, thumbnail) VALUES "+ 
         "('" + component.data.id + 
         "','" + component.data.name +
         "','" + component.data.description +
@@ -111,6 +112,7 @@ class Database {
         "','" + component.data.quantity +
         "','" + component.data.package +
         "','" + component.data.location +
+        "','" + component.data.thumbnail +
         "')";
         let queryOk = await this.query(query);
         if(queryOk != 0) {
@@ -140,10 +142,10 @@ class Database {
         let query = "SELECT * FROM " + this.storageTable + " WHERE productId='" + id + "'" ;
         let ret = await this.query(query);
         if(ret != 0) {
-            console.log("Successfully got productId" + id + " from table: " + this.storageTable + "!");
+            console.log("Successfully got productId " + id + " from table: " + this.storageTable + "!");
             return ret;
         } else {
-            console.log("Failed to get productId" + id + " from table: " + this.storageTable + "! Query: " + query);
+            console.log("Failed to get productId " + id + " from table: " + this.storageTable + "! Query: " + query);
             return false;
         }
     }

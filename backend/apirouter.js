@@ -80,7 +80,6 @@ apiRouter.get('/getComponents', async function(req, res) {
     console.log("GET component data")
     //let data = {};
     let components = await db.getComponents();
-    console.log("components: " + printObject(components))
     
     res.status(200).json({"data":components})
 })
@@ -90,9 +89,14 @@ apiRouter.get('/getComponent/:id', async function(req, res) {
 
     console.log("GET component data for id: " + id)
     let component = await db.getComponent(id);
-    console.log("component: " + printObject(component))
+    component.filePath = path.join(__dirname, '..', fileHandler.getFileStoragePath());
+    let obj = {
+        component: component,
+        filePath: path.join(__dirname, '..', fileHandler.getFileStoragePath()),
 
-    res.status(200).json({"data":component})
+    }
+    console.log(component)
+    res.status(200).json({"data":obj})
 })
 
 apiRouter.post('/saveFiles', function(req, res) {
@@ -146,7 +150,9 @@ apiRouter.get('/getFile/:partNum/:filename', function (req, res) {
     console.log("Path: " + path.join(__dirname, '..', 'fileStorage', partNum, filename))
     //res.download(path.join(__dirname, '..', 'fileStorage', partNum, filename), function (err) {
         res.download('./fileStorage/' + partNum + '/' + filename, function (err) {
-        console.log("Error: " + err);
+        if (err) {
+            console.log("Error: " + err);
+        }
     });
 });
 

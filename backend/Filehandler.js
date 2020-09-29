@@ -24,6 +24,10 @@ class FileHandler {
         }
     }
 
+    getFileStoragePath() {
+        return this.fileStorage;
+    }
+
     createFolder(name) {
         if (!fs.existsSync(name)){
             fs.mkdirSync(name);
