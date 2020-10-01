@@ -105,7 +105,7 @@ apiRouter.post('/saveFiles', function(req, res) {
             res.status(500).json({"message": "Unexpected error: " + err.message})
         } else {
             console.log("File uploaded successfully!")
-            console.log(printObject(req.files))
+            //console.log(printObject(req.files))
             fileHandler.storeNewFile(req.files);
             res.status(200).json({"message":"File uploaded successfully!"})
         }
@@ -113,15 +113,18 @@ apiRouter.post('/saveFiles', function(req, res) {
 })
 
 apiRouter.post('/addComponent', function(req, res) {
-    console.log("addComponent called. req:")
-    console.log(printObject(req.body));
-    console.log("len: " + req.body.data.files.length);
+    console.log("addComponent called")
+    //console.log(printObject(req.body));
+    //console.log("len: " + req.body.data.files.length);
 
     // Add part number to the file object
     let newArr = req.body.data.files;
     for (let i = 0; i < req.body.data.files.length; i++) {
         newArr[i].partNum = req.body.data.id;
     }
+
+    console.log("Adding to storing queue:");
+    printObject(newArr);
 
     fileHandler.addFileToStoringQueue(newArr);
     fileHandler.waitStoragingDone(newArr);
@@ -169,6 +172,17 @@ apiRouter.get('/getFileHeaders/:partNum', async (req, res) => {
     let files = await fileHandler.getFileHeaders(partNum);
     console.log(files);
     res.status(200).json({'files':files});
+});
+
+apiRouter.get('/test', (req, res) => {
+
+    console.log("File queue:");
+    fileHandler.logFileQueue();
+
+    console.log("Stored files:");
+    fileHandler.logStoredFiles();
+
+    res.status(200).json({'message':'success'});
 });
 
 module.exports = apiRouter;

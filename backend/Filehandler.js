@@ -1,5 +1,6 @@
 const fs = require('fs'); 
 const moveFile = require('./utils/moveFile.js');
+const util = require('util');
 
 function printObject(obj) {
     console.log(util.inspect(obj, false, null, true /* enable colors */))
@@ -45,13 +46,27 @@ class FileHandler {
 
     }
 
+    removeFileFromStoringQueue(file) {
+        let newQueue = [];
+        
+        for (let i = 0; i < this.filesToStore.length; i++) {
+            if (file !== this.filesToStore[i].name) {
+                if (!newQueue.includes(this.filesToStore[i].name)) {
+                    newQueue.push(this.filesToStore[i]);
+                }
+            }
+        }
+        
+        this.filesToStore = newQueue;
+    }
+
     printObject(obj) {
         console.log(util.inspect(obj, false, null, true /* enable colors */))
     }
 
-    checkIfFileStored(filename) {
+    checkIfFileStored(file) {
         for (let i = 0; i < this.storedFiles.length; i++) {
-            if (this.storedFiles[i].originalname.includes(filename)) {
+            if (this.storedFiles[i].filename === file.name && this.storedFiles[i].partNum == file.partNum) {
                 return true;
             }
         }
@@ -62,12 +77,12 @@ class FileHandler {
     async waitStoragingDone(data) {
         for(let i = 0; i < FILE_STORAGING_TIMEOUT; i++) {
             for(let j = 0; j < data.length; j++) {
-                console.log("printObj:");
-                console.log(data[j])
-                console.log(this.storedFiles)
-                if (this.checkIfFileStored(data[j].name)) {
-                    console.log("dbg22");
+                if (this.filesToStore.length === 0) {
                     return 1;
+                }
+
+                if (this.checkIfFileStored(data[j])) {
+                    this.removeFileFromStoringQueue(data[j].name);
                 }
             }
             await this.sleep(1000);
@@ -86,8 +101,8 @@ class FileHandler {
         for(let i = 0; i < this.filesToStore.length; i++) {
             if (file[0].filename.includes(this.filesToStore[i].name)  && 
                 this.filesToStore[i].size === file[0].size) {
-                    return this.filesToStore[i].partNum;
-                }
+                return this.filesToStore[i].partNum;
+            }
         }
 
         return null;
@@ -104,17 +119,18 @@ class FileHandler {
     }
 
     async storeNewFile(files) {
-        console.log("dbg1");
-        console.log(files)
         let partNum = null;
         for(let i = 0; i < FILE_STORAGING_TIMEOUT; i++) {
-            console.log("Working..");
             partNum = this.getPartNumFromFileToStore(files);
             if (partNum !== null) {
                 for (let j = 0; j < files.length; j++) {
                     this.storeFile(files[j], partNum);
-                    console.log("Successfully stored a file: " + files[j].filename);
-                    this.storedFiles.push(files[j]);
+                    let obj = {
+                        partNum: partNum,
+                        filename: files[j].filename,
+                        size: files[j].size
+                    }
+                    this.storedFiles.push(obj);
                 }
                 return 1;
             }
@@ -135,6 +151,15 @@ class FileHandler {
 
         return fileList;
     }
+
+    logFileQueue() {
+        this.printObject(this.filesToStore);
+    }
+
+    logStoredFiles() {
+        this.printObject(this.storedFiles);
+    }
+
 }
 
 module.exports = FileHandler;
