@@ -4,7 +4,8 @@
   "description": "backend for component storage",
   "main": "app",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha",
+    "format": "prettier-eslint 'backend/**/*.{js,json}' --write"
   },
   "repository": {
     "type": "git",
@@ -35,5 +36,15 @@
     "request": "^2.88.2",
     "request-promise": "^4.2.6",
     "util": "^0.12.3"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "chai-http": "^4.3.0",
+    "eslint": "^7.10.0",
+    "eslint-config-airbnb-base": "^14.2.0",
+    "eslint-plugin-import": "^2.22.1",
+    "mocha": "^8.1.3",
+    "prettier-eslint-cli": "^5.0.0",
+    "should": "^13.2.3"
   }
 }
