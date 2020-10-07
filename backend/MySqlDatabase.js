@@ -93,6 +93,9 @@ class Database {
             package VARCHAR(255) NOT NULL,
             location VARCHAR(255) NOT NULL,
             thumbnail VARCHAR(255) NOT NULL,
+            type VARCHAR(45) NOT NULL,
+            comment TEXT,
+            category VARCHAR(255) NOT NULL,
             created TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )`;
     console.log(`query: ${query}`);
@@ -102,7 +105,7 @@ class Database {
 
   async insertComponent(component) {
     const query = `INSERT INTO ${this.storageTable
-    } (productId, name, description, manufacturer, quantity, package, location, thumbnail) VALUES `
+    } (productId, name, description, manufacturer, quantity, package, location, thumbnail, type, comment, category) VALUES `
         + `('${component.data.id
         }','${component.data.name
         }','${component.data.description
@@ -111,6 +114,9 @@ class Database {
         }','${component.data.package
         }','${component.data.location
         }','${component.data.thumbnail
+        }','${component.data.type
+        }','${component.data.comment
+        }','${component.data.category
         }')`;
     const queryOk = await this.query(query);
     if (queryOk !== 0) {

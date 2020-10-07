@@ -22,11 +22,11 @@ const storage = multer.diskStorage({
 
 // Check File Type
 function checkFileType(file, cb) {
-  const filetypes = /txt|jpeg|jpg|png|gif|zip|pdf/;
-  const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-  const mimetype = filetypes.test(file.mimetype);
-  // const extname = true;
-  // const mimetype = true;
+  // const filetypes = /txt|jpeg|jpg|png|gif|zip|pdf/;
+  // const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+  // const mimetype = filetypes.test(file.mimetype);
+  const extname = true;
+  const mimetype = true;
   if (mimetype && extname) {
     return cb(null, true);
   }
@@ -102,7 +102,7 @@ apiRouter.post('/saveFiles', (req, res) => {
 
 apiRouter.post('/addComponent', (req, res) => {
   console.log('addComponent called');
-  // console.log(printObject(req.body));
+  printObject(req.body);
   // console.log("len: " + req.body.data.files.length);
 
   // Add part number to the file object
