@@ -181,4 +181,10 @@ apiRouter.get('/getPartnumber/:type', async (req, res) => {
   res.status(200).json({ partNum: ret });
 });
 
+apiRouter.get('/getPartnumbers', async (req, res) => {
+  const ret = await db.getNextAvailablePartNums();
+  console.log(ret);
+  res.status(200).json({ partNums: ret });
+});
+
 module.exports = apiRouter;

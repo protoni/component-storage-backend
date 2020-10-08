@@ -53,7 +53,7 @@ class Database {
   }
 
   query(sql, args) {
-    console.log(`query: ${sql}`);
+    // console.log(`query: ${sql}`);
     return new Promise((resolve, reject) => {
       this.connection.query(sql, args, (err, rows) => {
         if (err) {
@@ -287,7 +287,7 @@ class Database {
   }
 
   // eslint-disable-next-line class-methods-use-this
-  generateNextPartNum(type, currentPartNum) {
+  async generateNextPartNum(type, currentPartNum) {
     let idx = 1;
 
     // Parse current part index
@@ -308,7 +308,7 @@ class Database {
       idx = parseInt(num) + 1;
     }
 
-    console.log(`Generating next part num! next idx: ${idx}`);
+    // console.log(`Generating next part num! next idx: ${idx}`);
 
     // Get current part index number length
     const idxLen = idx.toString().length;
@@ -337,7 +337,7 @@ class Database {
     // Add index to the part number
     partNum += idx.toString();
 
-    console.log(`Generated new part num: ${partNum}`);
+    // console.log(`Generated new part num: ${partNum}`);
     return partNum;
   }
 
@@ -345,10 +345,10 @@ class Database {
     const query = `SELECT * FROM ${this.storageTable} WHERE type='${type}' ORDER BY productId desc LIMIT 1`;
     let ret = await this.query(query);
     if (ret !== 0) {
-      console.log(`Successfully got * from table: ${this.storageTable}! where type=${type}`);
+      // console.log(`Successfully got * from table: ${this.storageTable}! where type=${type}`);
 
       if (ret.length === 0) {
-        console.log('array empty!');
+        // console.log('array empty!');
         ret = this.generateNextPartNum(type, 0);
       } else {
         ret = this.generateNextPartNum(type, ret[0].productId);
@@ -358,6 +358,31 @@ class Database {
     }
     console.log(`Failed to get * from table: ${this.storageTable} where type=${type}! Query: ${query}`);
     return '';
+  }
+
+  async getNextAvailablePartNums() {
+    const partNumbers = [];
+
+    const query = `SELECT DISTINCT type FROM ${this.storageTable}`;
+    let ret = await this.query(query);
+    if (ret !== 0) {
+      for (let i = 0; i < ret.length; i += 1) {
+        // eslint-disable-next-line no-await-in-loop
+        const partNum = await this.getNextAvailablePartNum(ret[i].type);
+        const obj = {
+          type: ret[i].type,
+          partNum,
+        };
+
+        partNumbers.push(obj);
+      }
+      ret = partNumbers;
+
+      return ret;
+    }
+
+    console.log(`Failed to get DISTINCT type FROM: ${this.storageTable}`);
+    return [];
   }
 }
 
