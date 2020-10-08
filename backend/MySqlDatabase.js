@@ -15,6 +15,8 @@ class Database {
     this.blogPostTable = 'blog_posts';
     this.storageTable = 'storage_components';
     this.connection = null;
+    this.partNumLength = 8;
+    this.partNumTypeLength = 1;
     this.init();
   }
 
@@ -282,6 +284,80 @@ class Database {
 
     console.log('fetch post fail');
     return null;
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  generateNextPartNum(type, currentPartNum) {
+    let idx = 1;
+
+    // Parse current part index
+    if (currentPartNum !== 0) {
+      let num = '';
+      let start = false;
+      for (let i = 0; i < currentPartNum.length; i += 1) {
+        // Check if numeric and above 0
+        if (!isNaN(currentPartNum[i] - parseFloat(currentPartNum[i]))
+          && currentPartNum[i] > 0) {
+          start = true;
+        }
+
+        if (start) {
+          num += currentPartNum[i];
+        }
+      }
+      idx = parseInt(num) + 1;
+    }
+
+    console.log(`Generating next part num! next idx: ${idx}`);
+
+    // Get current part index number length
+    const idxLen = idx.toString().length;
+
+    // Calculate null padding length
+    const nullPadding = this.partNumLength - (this.partNumTypeLength + idxLen);
+
+    // Add type indicator to the part number
+    let partNum = '';
+    if (type === 'board') {
+      partNum += 'A';
+    } else if (type === 'component') {
+      partNum += 'B';
+    } else if (type === 'misc') {
+      partNum += 'C';
+    } else {
+      console.log('Eror! Unknown type.');
+      return '';
+    }
+
+    // Add null padding to the part number
+    for (let i = 0; i < nullPadding; i += 1) {
+      partNum += '0';
+    }
+
+    // Add index to the part number
+    partNum += idx.toString();
+
+    console.log(`Generated new part num: ${partNum}`);
+    return partNum;
+  }
+
+  async getNextAvailablePartNum(type) {
+    const query = `SELECT * FROM ${this.storageTable} WHERE type='${type}' ORDER BY productId desc LIMIT 1`;
+    let ret = await this.query(query);
+    if (ret !== 0) {
+      console.log(`Successfully got * from table: ${this.storageTable}! where type=${type}`);
+
+      if (ret.length === 0) {
+        console.log('array empty!');
+        ret = this.generateNextPartNum(type, 0);
+      } else {
+        ret = this.generateNextPartNum(type, ret[0].productId);
+      }
+
+      return ret;
+    }
+    console.log(`Failed to get * from table: ${this.storageTable} where type=${type}! Query: ${query}`);
+    return '';
   }
 }
 

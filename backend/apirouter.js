@@ -172,4 +172,13 @@ apiRouter.get('/test', (req, res) => {
   res.status(200).json({ message: 'success' });
 });
 
+apiRouter.get('/getPartnumber/:type', async (req, res) => {
+  const { type } = req.params;
+  console.log(`Getting next available part number for item type: ${type}`);
+
+  const ret = await db.getNextAvailablePartNum(type);
+
+  res.status(200).json({ partNum: ret });
+});
+
 module.exports = apiRouter;
