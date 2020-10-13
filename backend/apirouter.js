@@ -125,6 +125,13 @@ apiRouter.post('/addComponent', (req, res) => {
     res.status(500).json({ message: 'Database call failed!' });
   }
 });
+
+apiRouter.post('/editComponent', (req, res) => {
+  console.log('editComponent called');
+  printObject(req.body);
+  res.status(200).json({ message: 'success' });
+});
+
 /*
 apiRouter.get('/downloadFile/:partNum/:filename', function (req, res) {
     const { partNum, filename } = req.params;
