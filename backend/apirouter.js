@@ -129,7 +129,26 @@ apiRouter.post('/addComponent', (req, res) => {
 apiRouter.post('/editComponent', (req, res) => {
   console.log('editComponent called');
   printObject(req.body);
-  res.status(200).json({ message: 'success' });
+
+  // Add part number to the file object
+  const newArr = req.body.data.files;
+  for (let i = 0; i < req.body.data.files.length; i += 1) {
+    newArr[i].partNum = req.body.data.id;
+  }
+
+  console.log('Adding to storing queue:');
+  printObject(newArr);
+
+  fileHandler.addFileToStoringQueue(newArr);
+  fileHandler.waitStoragingDone(newArr);
+  fileHandler.deleteFiles(req.body.data.id, req.body.data.removedFiles);
+  try {
+    db.editComponent(req.body);
+    res.status(200).json({ message: 'success' });
+  } catch (err) {
+    console.log(`POST /editComponent: Database call failed! Error: ${err}`);
+    res.status(500).json({ message: 'Database call failed!' });
+  }
 });
 
 /*

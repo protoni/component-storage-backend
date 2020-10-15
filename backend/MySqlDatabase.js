@@ -131,6 +131,31 @@ class Database {
     return true;
   }
 
+  async editComponent(component) {
+    const query = `
+    UPDATE ${this.storageTable} SET 
+    name='${component.data.name}',
+    description='${component.data.description}',
+    manufacturer='${component.data.manufacturer}',
+    quantity='${component.data.quantity}',
+    package='${component.data.package}',
+    location='${component.data.location}',
+    thumbnail='${component.data.thumbnail}',
+    comment='${component.data.comment}',
+    category='${component.data.category}' WHERE 
+    productId='${component.data.id}'`;
+
+    const queryOk = await this.query(query);
+    if (queryOk !== 0) {
+      console.log(`Successfully edited a row in a table: ${this.storageTable}!`);
+    } else {
+      console.log(`Failed to edit a row in a table: ${this.storageTable}! Query: ${query}`);
+      return false;
+    }
+
+    return true;
+  }
+
   async getComponents() {
     const query = `SELECT * FROM ${this.storageTable}`;
     const ret = await this.query(query);

@@ -101,6 +101,7 @@ class FileHandler {
   }
 
   getPartNumFromFileToStore(file) {
+    console.log(this.filesToStore);
     for (let i = 0; i < this.filesToStore.length; i += 1) {
       if (file[0].filename.includes(this.filesToStore[i].name)
                 && this.filesToStore[i].size === file[0].size) {
@@ -122,8 +123,11 @@ class FileHandler {
     for (let i = 0; i < FILE_STORAGING_TIMEOUT; i += 1) {
       partNum = this.getPartNumFromFileToStore(files);
       if (partNum !== null) {
+        console.log('dbg4');
         for (let j = 0; j < files.length; j += 1) {
+          console.log('dbg5');
           this.storeFile(files[j], partNum);
+          console.log('dbg6');
           const obj = {
             partNum,
             filename: files[j].filename,
@@ -158,6 +162,22 @@ class FileHandler {
 
   logStoredFiles() {
     printObject(this.storedFiles);
+  }
+
+  deleteFiles(partNum, deletedFiles) {
+    try {
+      const fileLocation = `${this.fileStorage + partNum}/`;
+      fs.readdirSync(fileLocation).forEach((file) => {
+        if (deletedFiles.includes(file)) {
+          const path = fileLocation + file;
+          console.log(`Deleting file: ${path}`);
+          fs.unlinkSync(path);
+          console.log(`Deleted file: ${path}`);
+        }
+      });
+    } catch (err) {
+      console.log('Failed to delete files!');
+    }
   }
 }
 
